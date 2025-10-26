@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "firebase": "^12.4.0",
+    "geist": "^1.5.1",
+    "react-icons": "^5.5.0"
+  }
+}
