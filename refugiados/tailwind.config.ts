@@ -9,7 +9,11 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      // Aquí podés añadir estilos personalizados si querés en el futuro
+      // Fuentes personalizadas: Inter para body y Montserrat para headings
+      fontFamily: {
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'Arial', 'Helvetica', 'sans-serif'],
+        heading: ['Montserrat', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
     },
   },
   plugins: [],

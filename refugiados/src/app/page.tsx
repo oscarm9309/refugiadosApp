@@ -72,6 +72,9 @@ export default function LoginPage() {
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
       <main className="flex-grow flex items-center justify-center p-4">
         <div className="w-full max-w-sm p-8 space-y-8 bg-gray-800 rounded-lg shadow-lg">
+          <h1 className="text-5xl font-bold text-center text-blue-500">
+            RefugiApp
+          </h1>
           <h1 className="text-2xl font-bold text-center">Iniciar Sesión</h1>
 
           <form onSubmit={handleEmailPasswordSignIn} className="space-y-6">
@@ -149,6 +152,24 @@ export default function LoginPage() {
           </button>
         </div>
       </main>
+
+      {/* Menú de navegación inferior (opcional, si lo necesitás en el login) */}
+      {/* <footer className="w-full bg-gray-800 p-2">
+        <nav className="flex justify-around text-xs text-gray-400">
+          <a href="#" className="flex flex-col items-center gap-1 text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1V11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 001 1z" /></svg>
+            Inicio
+          </a>
+          <a href="#" className="flex flex-col items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            Registros
+          </a>
+          <a href="#" className="flex flex-col items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+            Reportes
+          </a>
+        </nav>
+      </footer> */}
     </div>
   );
 }
