@@ -1,29 +1,29 @@
-'use client'; // Directiva necesaria para usar hooks y eventos
+"use client"; // Directiva necesaria para usar hooks y eventos
 
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 // Importaciones de Firebase (servicios reales)
-import { signOut } from 'firebase/auth';
-import { auth } from 'lib/firebase';
+import { signOut } from "firebase/auth";
+import { auth } from "lib/firebase";
 
 // Importaciones de simulación (servicios "mock")
-import { mockSignOut } from 'lib/firebase.mock';
+import { mockSignOut } from "lib/firebase.mock";
 
 // Importa los íconos para la barra de navegación
-import { FiHome, FiFileText, FiBarChart2 } from 'react-icons/fi';
+import { FiHome, FiFileText, FiBarChart2, FiLogOut } from "react-icons/fi";
 
 export default function HomePage() {
   const router = useRouter();
 
   const handleSignOut = async () => {
     try {
-      if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true') {
+      if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true") {
         await mockSignOut(); // Usa el mock
       } else {
         await signOut(auth); // Usa el real
       }
-      router.push('/'); // Redirige al login después de cerrar sesión
+      router.push("/"); // Redirige al login después de cerrar sesión
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
       alert("Hubo un error al intentar cerrar la sesión.");
@@ -32,26 +32,34 @@ export default function HomePage() {
 
   // Funciones placeholder para los botones de las tarjetas
   const handleRegisterClick = () => {
-    router.push('/registrar');
+    router.push("/registrar");
     // router.push('/registrar'); // Descomentar cuando la ruta exista
   };
 
   const handleReportsClick = () => {
-    alert('Generando o descargando reportes...');
-    // router.push('/reportes'); // Descomentar cuando la ruta exista
+    // Navegar a la vista de descargar/generar reportes
+    router.push("/descargarReporte");
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
-      <header className="p-4">
-        {/* Podés añadir un botón de logout en el header si querés */}
-        {/* <button onClick={handleSignOut}>Cerrar Sesión</button> */}
-      </header>
-      
-      <main className="flex-grow flex flex-col items-center p-4 space-y-6">
-        <h1 className="text-3xl font-bold">Habitantes</h1>
+      <header className="p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <h1 className="text-lg font-semibold">Inicio</h1>
+        </div>
 
-        {/* Card para Registrar Habitante */}
+        <div>
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-2 px-3 py-2 bg-red-600 rounded-md text-sm hover:bg-red-500"
+          >
+            <FiLogOut size={18} />
+            <span className="hidden sm:inline">Cerrar sesión</span>
+          </button>
+        </div>
+      </header>
+
+      <main className="flex-1 p-6 flex flex-col items-center gap-6">
         <div className="w-full max-w-sm bg-gray-800 rounded-lg shadow-lg overflow-hidden">
           <Image
             src="/registrar-bg.jpg" // Asegurate de tener esta imagen en la carpeta `public`
@@ -84,9 +92,12 @@ export default function HomePage() {
             className="w-full h-48 object-cover"
           />
           <div className="p-6">
-            <h2 className="text-2xl font-bold mb-2">Descargar/Generar Reportes</h2>
+            <h2 className="text-2xl font-bold mb-2">
+              Descargar/Generar Reportes
+            </h2>
             <p className="text-gray-400 mb-4">
-              Descarga o genera reportes detallados sobre los habitantes registrados.
+              Descarga o genera reportes detallados sobre los habitantes
+              registrados.
             </p>
             <button
               onClick={handleReportsClick}

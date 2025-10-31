@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Importo Inter y Montserrat desde Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@600;700&display=swap");
 
 :root {
   --background: #ffffff;
@@ -25,5 +27,57 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Inter", Arial, Helvetica, sans-serif;
+}
+
+/* Usar Montserrat para los encabezados */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Montserrat", "Inter", Arial, sans-serif;
+}
+
+/* Page transition / loader animation */
+.animate-dot-delay-0 {
+  animation: dotPulse 0.9s infinite ease-in-out;
+  animation-delay: 0s;
+}
+.animate-dot-delay-1 {
+  animation: dotPulse 0.9s infinite ease-in-out;
+  animation-delay: 0.15s;
+}
+.animate-dot-delay-2 {
+  animation: dotPulse 0.9s infinite ease-in-out;
+  animation-delay: 0.3s;
+}
+
+@keyframes dotPulse {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.2);
+    opacity: 0.6;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* pequeña animación de fade para overlays */
+.fade-in {
+  animation: fadeIn 0.25s ease-out both;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
