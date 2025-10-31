@@ -8,6 +8,8 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signInWithEmailAndPassword, // Importa la función para login con correo/contraseña
+  fetchSignInMethodsForEmail,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { auth } from "lib/firebase";
 
@@ -22,11 +24,13 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showResetOption, setShowResetOption] = useState(false);
 
   // Función para manejar el inicio de sesión con correo y contraseña
   const handleEmailPasswordSignIn = async (e: React.FormEvent) => {
     e.preventDefault(); // Evita que la página se recargue al enviar el formulario
     setError(""); // Limpia errores previos
+    setShowResetOption(false);
 
     if (!email || !password) {
       setError("Por favor, ingresa tu correo y contraseña.");
@@ -34,6 +38,24 @@ export default function LoginPage() {
     }
 
     try {
+      // Antes de intentar signin por password, comprobamos los providers
+      if (process.env.NEXT_PUBLIC_USE_MOCK_DATA !== "true") {
+        try {
+          const methods = await fetchSignInMethodsForEmail(auth, email);
+          // Si el email existe pero solo con Google, ofrecemos enviar reset
+          if (methods.includes("google.com") && !methods.includes("password")) {
+            setError(
+              "Esta cuenta fue creada con Google. Puedes iniciar con Google o crear una contraseña vía correo."
+            );
+            setShowResetOption(true);
+            return;
+          }
+        } catch (err) {
+          console.warn("No se pudieron obtener los métodos de inicio:", err);
+          // continuar y dejar que el error original maneje cualquier fallo
+        }
+      }
+
       if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true") {
         console.log("Simulando inicio de sesión con correo y contraseña...");
         // Aquí podrías crear una función mock para este tipo de login si lo necesitaras
@@ -48,6 +70,18 @@ export default function LoginPage() {
       setError(
         "Las credenciales son incorrectas. Por favor, intentá de nuevo."
       );
+    }
+  };
+
+  // Enviar correo para crear/recuperar contraseña
+  const handleSendPasswordReset = async () => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setError("Se envió un correo para crear/recuperar la contraseña.");
+      setShowResetOption(false);
+    } catch (err: any) {
+      console.error("Error enviando correo de restablecimiento:", err);
+      setError("No fue posible enviar el correo de restablecimiento.");
     }
   };
 
@@ -118,6 +152,50 @@ export default function LoginPage() {
               <p className="text-sm text-red-500 text-center">{error}</p>
             )}
 
+            {showResetOption && (
+              <div className="flex flex-col items-center gap-2">
+                <button
+                  onClick={handleSendPasswordReset}
+                  className="w-full py-2 mt-1 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700"
+                >
+                  Enviar correo para crear/recuperar contraseña
+                </button>
+
+                <button
+                  onClick={handleGoogleSignIn}
+                  className="w-full py-2 mt-1 text-sm font-semibold text-white bg-gray-700 rounded-lg hover:bg-gray-600 flex items-center justify-center gap-2"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4"
+                  >
+                    <path
+                      fill="#4285F4"
+                      d="M21.35 11.1h-9.17v2.92h5.28c-.22 1.23-.9 2.27-1.9 2.97v2.47h3.07c1.8-1.66 2.88-4.12 2.88-7.36 0-.68-.07-1.34-.23-1.9z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12.18 21c2.6 0 4.78-.86 6.37-2.33l-3.07-2.47c-.85.57-1.94.9-3.3.9-2.54 0-4.69-1.72-5.46-4.04H3.46v2.53C5.04 19.98 8.36 21 12.18 21z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M6.72 13.06c-.2-.6-.32-1.24-.32-1.9s.12-1.3.32-1.9V6.73H3.46A9.98 9.98 0 003.46 12c0 1.6.36 3.12 1 4.52l2.26-3.46z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12.18 5.5c1.43 0 2.7.49 3.71 1.44l2.78-2.78C16.95 2.62 14.77 2 12.18 2 8.36 2 5.04 3.02 3.46 5.47l3.26 2.59C7.49 7.22 9.64 5.5 12.18 5.5z"
+                    />
+                  </svg>
+                  Iniciar sesión con Google
+                </button>
+
+                <p className="text-xs text-gray-400 text-center">
+                  También podés iniciar sesión con Google si preferís.
+                </p>
+              </div>
+            )}
+
             <button
               type="submit"
               className="w-full py-3 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors"
@@ -145,7 +223,7 @@ export default function LoginPage() {
             </label>
           </div>
           <button
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/registro")}
             className="w-full mt-2 py-3 font-semibold text-white bg-gray-600 rounded-lg hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition-colors"
           >
             Registrarse
