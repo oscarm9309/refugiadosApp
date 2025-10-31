@@ -11,12 +11,16 @@ import { auth } from 'lib/firebase';
 import { mockSignOut } from 'lib/firebase.mock';
 
 // Importa los íconos para la barra de navegación
-import { FiHome, FiFileText, FiBarChart2 } from 'react-icons/fi';
+import { FiHome, FiFileText, FiBarChart2, FiLogOut } from 'react-icons/fi';
 
 export default function HomePage() {
   const router = useRouter();
 
   const handleSignOut = async () => {
+    // Confirmación antes de cerrar sesión
+    const confirmed = typeof window !== 'undefined' ? window.confirm('¿Estás seguro que querés cerrar sesión?') : true;
+    if (!confirmed) return;
+
     try {
       if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true') {
         await mockSignOut(); // Usa el mock
@@ -43,9 +47,22 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
-      <header className="p-4">
-        {/* Podés añadir un botón de logout en el header si querés */}
-        {/* <button onClick={handleSignOut}>Cerrar Sesión</button> */}
+      <header className="p-4 flex items-center justify-between">
+        <div />
+        <div className="flex-1 text-center">
+          {/* espacio para título centrado si hace falta */}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-2 py-2 px-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium"
+            aria-label="Cerrar sesión"
+            title="Cerrar sesión"
+          >
+            <FiLogOut size={18} />
+            <span className="hidden sm:inline">Cerrar sesión</span>
+          </button>
+        </div>
       </header>
       
       <main className="flex-grow flex flex-col items-center p-4 space-y-6">

@@ -70,6 +70,7 @@ export default function LoginPage() {
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
       <main className="flex-grow flex items-center justify-center p-4">
         <div className="w-full max-w-sm p-8 space-y-8 bg-gray-800 rounded-lg shadow-lg">
+          <h1 className="text-5xl font-bold text-center text-blue-500">RefugiApp</h1>
           <h1 className="text-2xl font-bold text-center">Iniciar Sesión</h1>
 
           <form onSubmit={handleEmailPasswordSignIn} className="space-y-6">
@@ -130,7 +131,7 @@ export default function LoginPage() {
       </main>
 
       {/* Menú de navegación inferior (opcional, si lo necesitás en el login) */}
-      <footer className="w-full bg-gray-800 p-2">
+      {/* <footer className="w-full bg-gray-800 p-2">
         <nav className="flex justify-around text-xs text-gray-400">
           <a href="#" className="flex flex-col items-center gap-1 text-white">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1V11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 001 1z" /></svg>
@@ -145,7 +146,7 @@ export default function LoginPage() {
             Reportes
           </a>
         </nav>
-      </footer>
+      </footer> */}
     </div>
   );
 }

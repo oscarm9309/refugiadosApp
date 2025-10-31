@@ -18,6 +18,8 @@ interface Habitante {
   fechaNacimiento: string;
   sexo: string;
   nacionalidad: string;
+  zona: string;
+  tiempoEnCalle?: string;
   notas: string;
 }
 
@@ -29,13 +31,17 @@ export default function RegistrarPage() {
     fechaNacimiento: '',
     sexo: '',
     nacionalidad: '',
+    zona: '',
+    tiempoEnCalle: '',
     notas: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  // Controla el tipo del input de fecha para poder mostrar placeholder
+  const [fechaInputType, setFechaInputType] = useState<'text' | 'date'>('text');
 
   // Maneja los cambios en los inputs del formulario
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setHabitante(prevState => ({
       ...prevState,
@@ -46,9 +52,18 @@ export default function RegistrarPage() {
   // Maneja el envío del formulario
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    // Reseteo error y validación mínima de campos requeridos
     setError('');
+    if (!habitante.nombreCompleto.trim() || !habitante.zona.trim() || !habitante.sexo.trim()) {
+      setError('Por favor completá Nombre completo, Zona y Sexo antes de guardar.');
+      return;
+    }
 
+    // Confirmación del usuario antes de guardar
+    const confirmed = typeof window !== 'undefined' ? window.confirm('¿Estás seguro que querés guardar este registro?') : true;
+    if (!confirmed) return;
+
+    setLoading(true);
     try {
       if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true') {
         await mockAddHabitante(habitante);
@@ -92,30 +107,55 @@ export default function RegistrarPage() {
             onChange={handleChange}
             placeholder="Alias"
             className="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg"
-          />
-          <input
-            type="date"
-            name="fechaNacimiento"
-            value={habitante.fechaNacimiento}
-            onChange={handleChange}
-            placeholder="Fecha de nacimiento"
-            className="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg"
             required
           />
           <input
-            type="text"
-            name="sexo"
-            value={habitante.sexo}
+            type={fechaInputType}
+            name="fechaNacimiento"
+            value={habitante.fechaNacimiento}
             onChange={handleChange}
-            placeholder="Sexo"
-            className="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg"
+            placeholder="Fecha de nacimiento dd/mm/aaaa"
+            onFocus={() => setFechaInputType('date')}
+            onBlur={() => { if (!habitante.fechaNacimiento) setFechaInputType('text'); }}
+            className="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg"            
           />
+          <label className="block">
+            <select
+              name="sexo"
+              value={habitante.sexo}
+              onChange={handleChange}
+              className="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg"
+              required
+            >
+              <option value="">Seleccionar sexo</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Femenino">Femenino</option>
+              <option value="No definido">No definido</option>
+            </select>
+          </label>
           <input
             type="text"
             name="nacionalidad"
             value={habitante.nacionalidad}
             onChange={handleChange}
             placeholder="Nacionalidad"
+            className="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg"
+          />
+          <input
+            type="text"
+            name="zona"
+            value={habitante.zona}
+            onChange={handleChange}
+            placeholder="Zona"
+            className="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg"
+            required
+          />
+          <input
+            type="text"
+            name="tiempoEnCalle"
+            value={habitante.tiempoEnCalle}
+            onChange={handleChange}
+            placeholder="Tiempo en calle"
             className="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg"
           />
           <textarea
