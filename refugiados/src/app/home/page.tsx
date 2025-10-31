@@ -112,18 +112,32 @@ export default function HomePage() {
       {/* Menú de navegación inferior */}
       <footer className="w-full bg-gray-800 p-2 sticky bottom-0">
         <nav className="flex justify-around text-xs text-gray-400">
-          <a href="#" className="flex flex-col items-center gap-1 text-white">
+          <button
+            onClick={() => router.push("/home")}
+            className="flex flex-col items-center gap-1 text-white"
+            aria-label="Inicio"
+          >
             <FiHome size={24} />
             Inicio
-          </a>
-          <a href="#" className="flex flex-col items-center gap-1">
+          </button>
+
+          <button
+            onClick={() => router.push("/registrar")}
+            className="flex flex-col items-center gap-1"
+            aria-label="Registros"
+          >
             <FiFileText size={24} />
             Registros
-          </a>
-          <a href="#" className="flex flex-col items-center gap-1">
+          </button>
+
+          <button
+            onClick={() => router.push("/descargarReporte")}
+            className="flex flex-col items-center gap-1"
+            aria-label="Reportes"
+          >
             <FiBarChart2 size={24} />
             Reportes
-          </a>
+          </button>
         </nav>
       </footer>
     </div>

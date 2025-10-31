@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 // --- CAMBIOS REALIZADOS AQUÍ ---
-import { addHabitante } from 'lib/firebase';
-import { mockAddHabitante } from 'lib/firestore.mock';
+import { addHabitante } from "lib/firebase";
+import { mockAddHabitante } from "lib/firestore.mock";
 // --------------------------------
 
 // Importa un ícono para el botón de "atrás"
-import { FiArrowLeft } from 'react-icons/fi';
+import { FiArrowLeft } from "react-icons/fi";
 
 // Define la estructura de los datos del habitante
 interface Habitante {
@@ -26,24 +26,28 @@ interface Habitante {
 export default function RegistrarPage() {
   const router = useRouter();
   const [habitante, setHabitante] = useState<Habitante>({
-    nombreCompleto: '',
-    alias: '',
-    fechaNacimiento: '',
-    sexo: '',
-    nacionalidad: '',
-    zona: '',
-    tiempoEnCalle: '',
-    notas: '',
+    nombreCompleto: "",
+    alias: "",
+    fechaNacimiento: "",
+    sexo: "",
+    nacionalidad: "",
+    zona: "",
+    tiempoEnCalle: "",
+    notas: "",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   // Controla el tipo del input de fecha para poder mostrar placeholder
-  const [fechaInputType, setFechaInputType] = useState<'text' | 'date'>('text');
+  const [fechaInputType, setFechaInputType] = useState<"text" | "date">("text");
 
   // Maneja los cambios en los inputs del formulario
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setHabitante(prevState => ({
+    setHabitante((prevState) => ({
       ...prevState,
       [name]: value,
     }));
@@ -53,27 +57,36 @@ export default function RegistrarPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Reseteo error y validación mínima de campos requeridos
-    setError('');
-    if (!habitante.nombreCompleto.trim() || !habitante.zona.trim() || !habitante.sexo.trim()) {
-      setError('Por favor completá Nombre completo, Zona y Sexo antes de guardar.');
+    setError("");
+    if (
+      !habitante.nombreCompleto.trim() ||
+      !habitante.zona.trim() ||
+      !habitante.sexo.trim()
+    ) {
+      setError(
+        "Por favor completá Nombre completo, Zona y Sexo antes de guardar."
+      );
       return;
     }
 
     // Confirmación del usuario antes de guardar
-    const confirmed = typeof window !== 'undefined' ? window.confirm('¿Estás seguro que querés guardar este registro?') : true;
+    const confirmed =
+      typeof window !== "undefined"
+        ? window.confirm("¿Estás seguro que querés guardar este registro?")
+        : true;
     if (!confirmed) return;
 
     setLoading(true);
     try {
-      if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true') {
+      if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true") {
         await mockAddHabitante(habitante);
       } else {
         await addHabitante(habitante);
       }
-      alert('Habitante registrado con éxito');
-      router.push('/home'); // Redirige a la página de inicio
+      alert("Habitante registrado con éxito");
+      router.push("/home"); // Redirige a la página de inicio
     } catch (err) {
-      setError('Hubo un error al guardar el registro. Intentá de nuevo.');
+      setError("Hubo un error al guardar el registro. Intentá de nuevo.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -89,7 +102,7 @@ export default function RegistrarPage() {
         <h1 className="text-2xl font-bold mx-auto">Nuevo registro</h1>
       </header>
 
-      <main className="flex-grow">
+      <main className="flex-grow pb-24">
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
@@ -115,9 +128,11 @@ export default function RegistrarPage() {
             value={habitante.fechaNacimiento}
             onChange={handleChange}
             placeholder="Fecha de nacimiento dd/mm/aaaa"
-            onFocus={() => setFechaInputType('date')}
-            onBlur={() => { if (!habitante.fechaNacimiento) setFechaInputType('text'); }}
-            className="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg"            
+            onFocus={() => setFechaInputType("date")}
+            onBlur={() => {
+              if (!habitante.fechaNacimiento) setFechaInputType("text");
+            }}
+            className="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg"
           />
           <label className="block">
             <select
@@ -168,14 +183,14 @@ export default function RegistrarPage() {
           ></textarea>
 
           {error && <p className="text-red-500 text-center">{error}</p>}
-          
-          <div className="pt-4">
+
+          <div className="pt-4 mb-8">
             <button
               type="submit"
               disabled={loading}
               className="w-full py-3 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
             >
-              {loading ? 'Guardando...' : 'Guardar'}
+              {loading ? "Guardando..." : "Guardar"}
             </button>
           </div>
         </form>

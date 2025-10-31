@@ -3,6 +3,7 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import PageTransition from "./components/PageTransition";
+import Navigation from "./components/Navigation";
 
 // No necesitás volver a instanciar las fuentes aquí si las importás directamente
 // const geistSans = GeistSans({...}); // Esto ya no es necesario
@@ -23,6 +24,7 @@ export default function RootLayout({
         className={`${GeistSans.className} ${GeistMono.className} antialiased`}
       >
         <PageTransition>{children}</PageTransition>
+        <Navigation />
       </body>
     </html>
   );
