@@ -3,12 +3,14 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "lib/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
 type Report = {
   id: string;
   title: string;
   createdAt: string;
+  collection?: string | null;
+  description?: string;
   rows?: Record<string, any>[];
 };
 
@@ -26,16 +28,61 @@ export default function DescargarReportePage() {
   }, []);
 
   async function fetchReports() {
+    // Ahora cargamos los reportes directamente desde Firestore (colección `reportes`)
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/reports", { cache: "no-store" });
-      if (!res.ok) throw new Error("Error " + res.status);
-      const data = await res.json();
-      setReports(data || []);
-    } catch (err: any) {
-      // Si no existe endpoint /api/reports, no es crítico — permitimos usar el select para 'habitantes'
-      setError(null);
+      const q = query(collection(db, "reportes"), orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
+      const docs = snap.docs.map((d) => {
+        const data = d.data() as any;
+        // createdAt puede ser Timestamp o string
+        const createdAt =
+          data.createdAt && typeof (data.createdAt as any).toDate === "function"
+            ? (data.createdAt as any).toDate().toISOString()
+            : data.createdAt || new Date().toISOString();
+        return {
+          id: d.id,
+          title: data.title || data.collection || "Reporte",
+          createdAt,
+          collection: data.collection || null,
+          description: data.description || "",
+        } as Report;
+      });
+
+      // Si no hay documentos en la colección `reportes`, intentamos un fallback
+      // detectando colecciones conocidas como 'habitantes' para mantener compatibilidad
+      if (docs.length === 0) {
+        const fallbackReports: Report[] = [];
+        const candidates = ["habitantes"]; // añade más nombres si necesitas
+        for (const c of candidates) {
+          try {
+            const s = await getDocs(collection(db, c));
+            if (!s.empty) {
+              fallbackReports.push({
+                id: c,
+                title: `Reporte ${c.charAt(0).toUpperCase() + c.slice(1)}`,
+                createdAt: new Date().toISOString(),
+                collection: c,
+                description: `Reporte automático para la colección ${c}`,
+              });
+            }
+          } catch (e) {
+            // ignorar error en una colección candidata
+            console.warn(`No se pudo inspeccionar colección ${c}:`, e);
+          }
+        }
+        if (fallbackReports.length > 0) {
+          setReports(fallbackReports);
+        } else {
+          setReports([]);
+        }
+      } else {
+        setReports(docs);
+      }
+    } catch (err) {
+      console.error("Error cargando reportes desde Firestore:", err);
+      setError("No se pudieron cargar los reportes desde Firestore.");
     } finally {
       setLoading(false);
     }
@@ -64,28 +111,33 @@ export default function DescargarReportePage() {
     }
   }
 
-  // Nueva función: descarga los documentos de la colección 'habitantes' y los exporta a CSV
-  async function downloadHabitantes() {
+  async function downloadCollection(
+    collectionName: string,
+    filenameBase?: string
+  ) {
     setLoading(true);
     try {
-      const snap = await getDocs(collection(db, "habitantes"));
+      const snap = await getDocs(collection(db, collectionName));
       const rows = snap.docs.map((d) => ({
         id: d.id,
         ...(d.data() as Record<string, any>),
       }));
       if (!rows || rows.length === 0) {
-        alert("No se encontraron habitantes en la colección.");
+        alert(
+          `No se encontraron documentos en la colección '${collectionName}'.`
+        );
         return;
       }
       const csv = jsonToCsv(rows);
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const name = filenameBase || collectionName;
       const url = URL.createObjectURL(blob);
-      triggerBrowserDownload(url, `habitantes_${new Date().toISOString()}.csv`);
+      triggerBrowserDownload(url, `${name}_${new Date().toISOString()}.csv`);
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error(err);
       alert(
-        "Error al leer la colección 'habitantes' desde Firestore. Comprueba las reglas y la conexión."
+        `Error al leer la colección '${collectionName}' desde Firestore. Comprueba las reglas y la conexión.`
       );
     } finally {
       setLoading(false);
@@ -113,12 +165,22 @@ export default function DescargarReportePage() {
     try {
       let dataRows = report.rows;
       if (!dataRows) {
-        const res = await fetch(
-          `/api/reports?id=${encodeURIComponent(report.id)}`
-        );
-        if (!res.ok) throw new Error("No se pudo obtener detalle del reporte");
-        const obj = await res.json();
-        dataRows = obj.rows || [];
+        // Si el reporte tiene una colección asociada, leemos desde Firestore
+        if (report.collection) {
+          const snap = await getDocs(collection(db, report.collection));
+          dataRows = snap.docs.map((d) => ({
+            id: d.id,
+            ...(d.data() as Record<string, any>),
+          }));
+        } else {
+          const res = await fetch(
+            `/api/reports?id=${encodeURIComponent(report.id)}`
+          );
+          if (!res.ok)
+            throw new Error("No se pudo obtener detalle del reporte");
+          const obj = await res.json();
+          dataRows = obj.rows || [];
+        }
       }
       if (!dataRows || dataRows.length === 0) {
         alert("El reporte no contiene filas para exportar.");
@@ -190,26 +252,26 @@ export default function DescargarReportePage() {
           Selecciona el reporte que quieres descargar desde la base de datos.
         </p>
 
-        <div className="flex gap-3 mb-4 items-center">
+        {/* <div className="flex gap-3 mb-4 items-center">
           <select
             value={selectedReport}
             onChange={(e) => setSelectedReport(e.target.value)}
             className="bg-gray-800 px-3 py-2 rounded-md"
           >
             <option value="">-- Selecciona un reporte --</option>
-            <option value="habitantes">Reporte Habitantes</option>
-            {/* Agrega más opciones aquí si hay otros reportes */}
+            {reports.map((r) => (
+              <option key={r.id} value={r.collection || r.id}>
+                {r.title}
+              </option>
+            ))}
           </select>
 
           <button
             onClick={async () => {
               if (!selectedReport)
                 return alert("Selecciona primero un reporte.");
-              if (selectedReport === "habitantes") {
-                await downloadHabitantes();
-              } else {
-                alert("Reporte no soportado.");
-              }
+              // descargamos por colección (si el value es el nombre de la colección)
+              await downloadCollection(selectedReport, selectedReport);
             }}
             className="px-3 py-2 bg-blue-600 rounded-md text-sm hover:bg-blue-500"
             disabled={loading}
@@ -224,7 +286,7 @@ export default function DescargarReportePage() {
           >
             Actualizar lista de reportes
           </button>
-        </div>
+        </div> */}
 
         {loading && <div className="text-gray-400 mb-2">Cargando...</div>}
         {error && <div className="text-red-500 mb-2">{error}</div>}
